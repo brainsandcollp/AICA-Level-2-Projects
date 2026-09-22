@@ -1,0 +1,43 @@
+GST RECONCILIATION - GOOGLE DRIVE DROP DEMO
+
+Files supplied
+1. GST_Reconciliation_GDrive_Demo.json - import into n8n
+2. PR_24ABCDE1234F1Z5_2026-08.csv - sample Purchase Register
+3. GSTR2B_24ABCDE1234F1Z5_2026-08.json - sample GSTR-2B JSON
+
+ONE-TIME SETUP IN N8N
+1. Create a Google Drive folder for input files.
+2. Import GST_Reconciliation_GDrive_Demo.json.
+3. In "When files are added" and "Search input folder", replace PUT_INPUT_FOLDER_ID_HERE with the folder ID.
+4. Select the Google Drive OAuth credential in both Drive nodes.
+5. Confirm the Gmail credential in "Email reconciliation to client".
+6. The demo recipient is ishan@helloishan.com, retained from the original workflow. Change it if required.
+7. Activate the workflow.
+
+DEMO
+Upload these two sample files to the watched folder:
+- PR_24ABCDE1234F1Z5_2026-08.csv
+- GSTR2B_24ABCDE1234F1Z5_2026-08.json
+
+The workflow waits until both are present, downloads them, reconciles them, creates an XLSX and emails it.
+
+FILE NAMING RULE
+PR_<GSTIN>_YYYY-MM.csv
+GSTR2B_<GSTIN>_YYYY-MM.json
+
+MATCHING LOGIC
+Primary: Supplier GSTIN + normalised invoice number.
+Normalisation ignores separators such as / and - and letter case.
+Fallback: Supplier GSTIN + invoice date + taxable amount within Rs 1.
+Comparison tolerance: Rs 1 for taxable value and tax.
+
+EXPECTED RESULT FOR THE SUPPLIED TEST DATA
+Purchase Register invoices: 10
+GSTR-2B invoices: 9
+Matched: 5
+Mismatches: 3
+PR not in 2B: 2
+2B not in PR: 1
+Indicative ITC at risk: Rs 34,400
+
+The reconciliation decision is deterministic and does not use an LLM.
